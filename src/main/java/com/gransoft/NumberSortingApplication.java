@@ -46,6 +46,7 @@ public class NumberSortingApplication {
     private JButton sortButton;
     private final List<Integer> numbers = new ArrayList<>();
     private boolean ascending = true;
+    SwingWorker<Void, List<Integer>> sortNumberWorker;
 
     /**
      * Constructor.
@@ -111,7 +112,7 @@ public class NumberSortingApplication {
                 int count = Integer.parseInt(inputField.getText());
                 if (count > 0 && count <= MAX_RANDOM_VALUE) {
                     generateNumbers(count);
-                    cardLayout.show(mainPanel, getSortButtonText());
+                    cardLayout.show(mainPanel, "Sort");
                 }
                 else {
                     JOptionPane.showMessageDialog(jFrame,
@@ -153,6 +154,9 @@ public class NumberSortingApplication {
 
         sortButton.addActionListener(e -> sortNumbers());
         resetButton.addActionListener(e -> {
+            if (sortNumberWorker != null) {
+                sortNumberWorker.cancel(true);
+            }
             inputField.setText("");
             numbers.clear();
             cardLayout.show(mainPanel, "Intro");
@@ -165,7 +169,7 @@ public class NumberSortingApplication {
 
         sortPanel.add(scrollPane, BorderLayout.CENTER);
         sortPanel.add(buttonPanel, BorderLayout.EAST);
-        mainPanel.add(sortPanel, getSortButtonText());
+        mainPanel.add(sortPanel, "Sort");
     }
 
     /**
@@ -242,6 +246,9 @@ public class NumberSortingApplication {
      */
     private void handleNumberClick(int num) {
         if (num <= NUMBER_THRESHOLD) {
+            if (sortNumberWorker != null) {
+                sortNumberWorker.cancel(true);
+            }
             numbers.clear();
             generateNumbers(num);
         }
@@ -257,7 +264,7 @@ public class NumberSortingApplication {
         ascending = !ascending;
         sortButton.setEnabled(false);
 
-        SwingWorker<Void, List<Integer>> worker = new SwingWorker<>() {
+        sortNumberWorker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
                 quickSort(numbers, 0, numbers.size() - 1);
@@ -271,7 +278,7 @@ public class NumberSortingApplication {
             }
         };
 
-        worker.execute();
+        sortNumberWorker.execute();
     }
 
     /**
